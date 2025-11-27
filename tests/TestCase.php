@@ -1,0 +1,38 @@
+<?php
+declare(strict_types=1);
+
+namespace Imahmood\Money\Tests;
+
+use Imahmood\Money\MoneyServiceProvider;
+use Orchestra\Testbench\TestCase as Orchestra;
+
+abstract class TestCase extends Orchestra
+{
+    /**
+     * Add the package provider.
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     */
+    protected function getPackageProviders($app): array
+    {
+        return [MoneyServiceProvider::class];
+    }
+
+    /**
+     * Define environment setup.
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     */
+    protected function getEnvironmentSetUp($app): void
+    {
+        $config = require __DIR__.'/../config/money.php';
+        $app['config']->set('money', $config);
+
+        $app['config']->set('database.default', 'testbench');
+        $app['config']->set('database.connections.testbench', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
+        ]);
+    }
+}

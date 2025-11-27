@@ -1,0 +1,59 @@
+{
+    "name": "imahmood/laravel-money",
+    "description": "Laravel money",
+    "license": "MIT",
+    "type": "library",
+    "keywords": [
+        "laravel",
+        "money",
+        "laravel-money"
+    ],
+    "authors": [
+        {
+            "name": "Mahmood Dehghani",
+            "email": "mahmood.public@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "ext-intl": "*",
+        "ext-decimal": "*",
+        "laravel/framework": "^10.0|^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "^2.0|^3.0",
+        "laravel/pint": "1.26.0",
+        "orchestra/testbench": "^8.0|^9.0|^10.0|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Imahmood\\Money\\": "src/"
+        },
+        "files": [
+          "src/functions.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Imahmood\\Money\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "./vendor/bin/phpunit --do-not-cache-result",
+        "cs-check": "./vendor/bin/pint --test --parallel",
+        "cs-fix": "./vendor/bin/pint --parallel",
+        "stan": "./vendor/bin/phpstan analyse --memory-limit=-1"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Imahmood\\Money\\MoneyServiceProvider"
+            ]
+        }
+    }
+}
