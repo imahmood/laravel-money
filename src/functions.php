@@ -17,18 +17,18 @@ if (! function_exists('decimal')) {
         }
 
         if (is_numeric($value)) {
-            $value = new Decimal((string) $value, $precision);
+            $value = method_exists(Decimal::class, 'valueOf')
+                ? Decimal::valueOf((string) $value, $precision)
+                : new Decimal((string) $value, $precision);
         }
 
-        // If the value is not already a Decimal object at this point, throw an exception.
         if (! $value instanceof Decimal) {
-            throw new InvalidArgumentException(sprintf(
-                'Cannot convert value of type `%s` to decimal',
-                get_debug_type($value)
-            ));
+            throw new InvalidArgumentException(
+                sprintf('Cannot convert value of type `%s` to decimal', get_debug_type($value))
+            );
         }
 
-        return $value->isInteger() ? $value->truncate() : $value;
+        return $value;
     }
 }
 

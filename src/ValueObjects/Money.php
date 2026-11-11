@@ -39,7 +39,7 @@ final class Money implements JsonSerializable, Stringable
             return false;
         }
 
-        return $this->value->equals((string) $value);
+        return $this->value->compareTo((string) $value) === 0;
     }
 
     /**

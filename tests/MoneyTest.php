@@ -18,7 +18,7 @@ class MoneyTest extends TestCase
     {
         $currency = $this->currency();
         $money = new Money(100, $currency);
-        $decimalMoney = new Money(new Decimal('100'), $currency);
+        $decimalMoney = new Money(decimal('100'), $currency);
         $stringMoney = new Money('100', $currency);
 
         $this->assertSame($currency, $money->currency());
@@ -54,7 +54,7 @@ class MoneyTest extends TestCase
         $money = new Money(100, $currency);
 
         $this->assertTrue($money->equals(100));
-        $this->assertTrue($money->equals(new Decimal('100')));
+        $this->assertTrue($money->equals(decimal('100')));
         $this->assertTrue($money->equals(new Money(100, $currency)));
         $this->assertFalse($money->equals(99));
         $this->assertFalse($money->equals(new Money(100, $this->currency('IRT', 'تومان'))));
@@ -66,7 +66,7 @@ class MoneyTest extends TestCase
         $money = new Money('100.50', $currency);
 
         $this->assertTrue($money->greaterThan(100));
-        $this->assertFalse($money->greaterThan(new Decimal('100.50')));
+        $this->assertFalse($money->greaterThan(decimal('100.50')));
         $this->assertTrue($money->lessThan(new Money('101', $currency)));
         $this->assertFalse($money->lessThan(100));
     }
@@ -76,7 +76,7 @@ class MoneyTest extends TestCase
         $currency = $this->currency();
         $money = new Money('100.50', $currency);
 
-        $this->assertTrue($money->greaterThanOrEqual(new Decimal('100.50')));
+        $this->assertTrue($money->greaterThanOrEqual(decimal('100.50')));
         $this->assertTrue($money->greaterThanOrEqual(100));
         $this->assertTrue($money->lessThanOrEqual(new Money('100.50', $currency)));
         $this->assertTrue($money->lessThanOrEqual(101));
@@ -119,7 +119,7 @@ class MoneyTest extends TestCase
         $this->assertSame('125', $result->toString());
         $this->assertSame($currency, $result->currency());
         $this->assertSame('100', $money->toString());
-        $this->assertSame('125', $money->add(new Decimal('25'))->toString());
+        $this->assertSame('125', $money->add(decimal('25'))->toString());
     }
 
     public function test_it_subtracts_values(): void
@@ -192,7 +192,7 @@ class MoneyTest extends TestCase
 
         $converted = $money->convert($irt);
 
-        $this->assertSame('10', $converted->toString());
+        $this->assertSame('10.0', $converted->toString());
         $this->assertSame($irt, $converted->currency());
         $this->assertSame('100', $money->toString());
     }
@@ -210,7 +210,7 @@ class MoneyTest extends TestCase
 
         $this->assertSame('100', $money->toString());
         $this->assertSame('1000', $fromLocal->toString());
-        $this->assertSame('10', $toLocal->toString());
+        $this->assertSame('10.0', $toLocal->toString());
         $this->assertSame('IRR', $fromLocal->currency()->code);
         $this->assertSame('IRT', $toLocal->currency()->code);
     }

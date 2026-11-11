@@ -17,13 +17,14 @@ permissions:
 
 jobs:
   tests:
-    name: Laravel ${{ matrix.laravel }}
+    name: Laravel ${{ matrix.laravel }} / Decimal ${{ matrix.decimal }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         laravel: ['12', '13']
+        decimal: ['1.5.0', '2.0.1']
 
     steps:
       - name: Checkout code
@@ -33,9 +34,11 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: decimal
+          extensions: decimal-${{ matrix.decimal }}
           tools: cs2pr
           coverage: none
+        env:
+          fail-fast: true
 
       - name: Install composer dependencies
         run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --with-all-dependencies --with "laravel/framework:^${{ matrix.laravel }}.0"

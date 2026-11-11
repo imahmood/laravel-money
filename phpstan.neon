@@ -7,3 +7,7 @@ parameters:
         - src
         - tests
     treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        -
+            message: '#Call to function method_exists\(\) with .*Decimal.*valueOf.*will always evaluate to false\.#'
+            path: src/functions.php
