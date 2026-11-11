@@ -7,8 +7,9 @@ use Decimal\Decimal;
 use Imahmood\Money\Exceptions\CurrencyMismatchException;
 use InvalidArgumentException;
 use JsonSerializable;
+use Stringable;
 
-final class Money implements JsonSerializable
+final class Money implements JsonSerializable, Stringable
 {
     private readonly Decimal $value;
 
@@ -39,6 +40,46 @@ final class Money implements JsonSerializable
         }
 
         return $this->value->equals((string) $value);
+    }
+
+    /**
+     * @throws \Imahmood\Money\Exceptions\CurrencyMismatchException
+     */
+    public function greaterThan(Money|Decimal|int $value): bool
+    {
+        $this->validateValue($value);
+
+        return $this->value->compareTo((string) $value) > 0;
+    }
+
+    /**
+     * @throws \Imahmood\Money\Exceptions\CurrencyMismatchException
+     */
+    public function lessThan(Money|Decimal|int $value): bool
+    {
+        $this->validateValue($value);
+
+        return $this->value->compareTo((string) $value) < 0;
+    }
+
+    /**
+     * @throws \Imahmood\Money\Exceptions\CurrencyMismatchException
+     */
+    public function greaterThanOrEqual(Money|Decimal|int $value): bool
+    {
+        $this->validateValue($value);
+
+        return $this->value->compareTo((string) $value) >= 0;
+    }
+
+    /**
+     * @throws \Imahmood\Money\Exceptions\CurrencyMismatchException
+     */
+    public function lessThanOrEqual(Money|Decimal|int $value): bool
+    {
+        $this->validateValue($value);
+
+        return $this->value->compareTo((string) $value) <= 0;
     }
 
     /**
@@ -99,11 +140,7 @@ final class Money implements JsonSerializable
     private function validateValue(Money|Decimal|int $value): void
     {
         if ($value instanceof self && ! $this->currency->equals($value->currency)) {
-            throw new CurrencyMismatchException(sprintf(
-                'Cannot perform operation between currencies "%s" and "%s".',
-                $this->currency->code,
-                $value->currency->code
-            ));
+            throw CurrencyMismatchException::create($this->currency, $value->currency);
         }
     }
 
@@ -113,9 +150,10 @@ final class Money implements JsonSerializable
             return new self($this->value, $this->currency);
         }
 
-        $exchangeRate = config(sprintf('money.exchange.%s.%s', $this->currency->code, $currency->code), 1);
+        $configKey = sprintf('money.exchange.%s.%s', $this->currency->code, $currency->code);
+        $exchangeRate = trim((string) config($configKey, ''));
 
-        if ($exchangeRate === null) {
+        if (! $exchangeRate) {
             throw new InvalidArgumentException(sprintf(
                 'Exchange rate from %s to %s not found.',
                 $this->currency->code,
@@ -132,7 +170,7 @@ final class Money implements JsonSerializable
     public function format(): string
     {
         return number_format(
-            $this->value->toInt(),
+            $this->value->toFloat(),
             $this->currency->decimals,
             $this->currency->decimalPoint,
             $this->currency->thousandsSep,

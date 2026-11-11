@@ -3,22 +3,25 @@ declare(strict_types=1);
 
 namespace Imahmood\Money\ValueObjects;
 
-use InvalidArgumentException;
+use Imahmood\Money\Exceptions\CurrencyNotSupportedException;
 
 class CurrencyFactory
 {
     /**
-     * @throws \InvalidArgumentException
+     * @throws \Imahmood\Money\Exceptions\CurrencyNotSupportedException
      */
     public static function createFromIsoCode(string $code): Currency
     {
+        /**
+         * @var array{decimals: int, decimalPoint: string, thousandsSep: string, symbolLeft: string, symbolRight: string}|null $config
+         */
         $config = config('money.currencies.'.$code);
         if ($config === null) {
-            throw new InvalidArgumentException("Currency code '$code' is not supported.");
+            throw new CurrencyNotSupportedException("Currency code '{$code}' is not supported.");
         }
 
         return new Currency(
-            code: $code,
+            code: strtoupper($code),
             decimals: (int) $config['decimals'],
             decimalPoint: $config['decimalPoint'],
             thousandsSep: $config['thousandsSep'],
@@ -27,13 +30,19 @@ class CurrencyFactory
         );
     }
 
+    /**
+     * @throws \Imahmood\Money\Exceptions\CurrencyNotSupportedException
+     */
     public static function defaultCurrency(): Currency
     {
-        return static::createFromIsoCode(config('money.defaultCurrency'));
+        return static::createFromIsoCode((string) config('money.defaultCurrency'));
     }
 
+    /**
+     * @throws \Imahmood\Money\Exceptions\CurrencyNotSupportedException
+     */
     public static function localCurrency(): Currency
     {
-        return static::createFromIsoCode(config('money.localCurrency'));
+        return static::createFromIsoCode((string) config('money.localCurrency'));
     }
 }

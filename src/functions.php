@@ -33,15 +33,21 @@ if (! function_exists('decimal')) {
 }
 
 if (! function_exists('money')) {
+    /**
+     * @throws \Imahmood\Money\Exceptions\CurrencyNotSupportedException
+     */
     function money(Decimal|string|int $amount, ?Currency $currency = null): Money
     {
-        $currency = $currency ?? CurrencyFactory::defaultCurrency();
+        $currency ??= CurrencyFactory::defaultCurrency();
 
         return new Money($amount, $currency);
     }
 }
 
 if (! function_exists('from_local_currency')) {
+    /**
+     * @throws \Imahmood\Money\Exceptions\CurrencyNotSupportedException
+     */
     function from_local_currency(Decimal|string|int $amount): Money
     {
         return money($amount, CurrencyFactory::localCurrency())
@@ -50,6 +56,9 @@ if (! function_exists('from_local_currency')) {
 }
 
 if (! function_exists('to_local_currency')) {
+    /**
+     * @throws \Imahmood\Money\Exceptions\CurrencyNotSupportedException
+     */
     function to_local_currency(Decimal|string|int $amount): Money
     {
         return money($amount)->convert(CurrencyFactory::localCurrency());

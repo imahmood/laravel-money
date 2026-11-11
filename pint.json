@@ -3,6 +3,9 @@
     "rules": {
         "blank_line_after_opening_tag": false,
         "declare_strict_types": true,
+        "fully_qualified_strict_types": {
+            "phpdoc_tags": []
+        },
         "new_with_parentheses": false,
         "strict_comparison": true
     }

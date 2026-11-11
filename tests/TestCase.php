@@ -25,11 +25,12 @@ abstract class TestCase extends Orchestra
      */
     protected function getEnvironmentSetUp($app): void
     {
-        $config = require __DIR__.'/../config/money.php';
-        $app['config']->set('money', $config);
+        /** @var \Illuminate\Config\Repository $config */
+        $config = $app['config'];
 
-        $app['config']->set('database.default', 'testbench');
-        $app['config']->set('database.connections.testbench', [
+        $config->set('money', require __DIR__.'/../config/money.php');
+        $config->set('database.default', 'testbench');
+        $config->set('database.connections.testbench', [
             'driver' => 'sqlite',
             'database' => ':memory:',
             'prefix' => '',

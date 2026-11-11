@@ -6,9 +6,4 @@ parameters:
     paths:
         - src
         - tests
-
-    ignoreErrors:
-        -
-            identifier: missingType.generics
-
     treatPhpDocTypesAsCertain: false

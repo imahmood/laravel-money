@@ -5,7 +5,9 @@ namespace Imahmood\Money\Tests;
 
 use Decimal\Decimal;
 use Imahmood\Money\Exceptions\CurrencyMismatchException;
+use Imahmood\Money\Exceptions\CurrencyNotSupportedException;
 use Imahmood\Money\ValueObjects\Currency;
+use Imahmood\Money\ValueObjects\CurrencyFactory;
 use Imahmood\Money\ValueObjects\Money;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -56,6 +58,55 @@ class MoneyTest extends TestCase
         $this->assertTrue($money->equals(new Money(100, $currency)));
         $this->assertFalse($money->equals(99));
         $this->assertFalse($money->equals(new Money(100, $this->currency('IRT', 'تومان'))));
+    }
+
+    public function test_it_compares_values_with_greater_than_and_less_than_methods(): void
+    {
+        $currency = $this->currency();
+        $money = new Money('100.50', $currency);
+
+        $this->assertTrue($money->greaterThan(100));
+        $this->assertFalse($money->greaterThan(new Decimal('100.50')));
+        $this->assertTrue($money->lessThan(new Money('101', $currency)));
+        $this->assertFalse($money->lessThan(100));
+    }
+
+    public function test_it_compares_equal_values_with_greater_than_or_equal_and_less_than_or_equal_methods(): void
+    {
+        $currency = $this->currency();
+        $money = new Money('100.50', $currency);
+
+        $this->assertTrue($money->greaterThanOrEqual(new Decimal('100.50')));
+        $this->assertTrue($money->greaterThanOrEqual(100));
+        $this->assertTrue($money->lessThanOrEqual(new Money('100.50', $currency)));
+        $this->assertTrue($money->lessThanOrEqual(101));
+        $this->assertFalse($money->greaterThanOrEqual(101));
+        $this->assertFalse($money->lessThanOrEqual(100));
+    }
+
+    #[DataProvider('comparisonMethods')]
+    public function test_comparisons_reject_different_currencies(string $method): void
+    {
+        $money = new Money(100, $this->currency());
+        $operand = new Money(100, $this->currency('IRT', 'تومان'));
+
+        $this->expectException(CurrencyMismatchException::class);
+        $this->expectExceptionMessageIs('Cannot perform operation between currencies "IRR" and "IRT".');
+
+        $money->{$method}($operand);
+    }
+
+    /**
+     * @return list<array{string}>
+     */
+    public static function comparisonMethods(): array
+    {
+        return [
+            ['greaterThan'],
+            ['lessThan'],
+            ['greaterThanOrEqual'],
+            ['lessThanOrEqual'],
+        ];
     }
 
     public function test_it_adds_values_without_mutating_the_original(): void
@@ -115,7 +166,13 @@ class MoneyTest extends TestCase
         $this->expectException(CurrencyMismatchException::class);
         $this->expectExceptionMessageIs('Cannot perform operation between currencies "IRR" and "IRT".');
 
-        $money->{$operation}($operand);
+        match ($operation) {
+            'add' => $money->add($operand),
+            'sub' => $money->sub($operand),
+            'mul' => $money->mul($operand),
+            'div' => $money->div($operand),
+            default => throw new \LogicException("Unknown operation '{$operation}'."),
+        };
     }
 
     /**
@@ -158,6 +215,14 @@ class MoneyTest extends TestCase
         $this->assertSame('IRT', $toLocal->currency()->code);
     }
 
+    public function test_it_throws_when_currency_is_not_supported(): void
+    {
+        $this->expectException(CurrencyNotSupportedException::class);
+        $this->expectExceptionMessageIs("Currency code 'USD' is not supported.");
+
+        CurrencyFactory::createFromIsoCode('USD');
+    }
+
     public function test_conversion_to_the_same_currency_returns_an_equivalent_new_instance(): void
     {
         $currency = $this->currency();
@@ -190,7 +255,7 @@ class MoneyTest extends TestCase
 
     public function test_it_formats_values_with_currency_separators_and_symbols(): void
     {
-        $money = new Money(1234567, $this->currency());
+        $money = new Money(1_234_567, $this->currency());
 
         $this->assertSame('1٬234٬567', $money->format());
         $this->assertSame('1٬234٬567 ریال', $money->formatWithSymbol());
