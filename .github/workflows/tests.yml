@@ -1,0 +1,52 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Laravel ${{ matrix.laravel }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        laravel: ['12', '13']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: decimal
+          tools: cs2pr
+          coverage: none
+
+      - name: Install composer dependencies
+        run: composer update -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --with-all-dependencies --with "laravel/framework:^${{ matrix.laravel }}.0"
+        env:
+          COMPOSER_CACHE_DIR: ${{ github.workspace }}/.composer-cache
+
+      - name: Running Pint
+        run: vendor/bin/pint --test
+
+      - name: Running PHPStan
+        run: vendor/bin/phpstan analyse --error-format=github
+
+      - name: Running PHPUnit
+        run: vendor/bin/phpunit

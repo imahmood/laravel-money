@@ -56,7 +56,7 @@ class MoneyCastTest extends TestCase
         $model->setRawAttributes(['amount' => '100']);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageIs('Currency attribute "currency_code" is required to cast money.');
+        $this->expectExactExceptionMessage('Currency attribute "currency_code" is required to cast money.');
 
         $model->getAttribute('amount');
     }

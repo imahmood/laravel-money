@@ -91,7 +91,7 @@ class MoneyTest extends TestCase
         $operand = new Money(100, $this->currency('IRT', 'تومان'));
 
         $this->expectException(CurrencyMismatchException::class);
-        $this->expectExceptionMessageIs('Cannot perform operation between currencies "IRR" and "IRT".');
+        $this->expectExactExceptionMessage('Cannot perform operation between currencies "IRR" and "IRT".');
 
         $money->{$method}($operand);
     }
@@ -164,7 +164,7 @@ class MoneyTest extends TestCase
         $operand = new Money(25, $irt);
 
         $this->expectException(CurrencyMismatchException::class);
-        $this->expectExceptionMessageIs('Cannot perform operation between currencies "IRR" and "IRT".');
+        $this->expectExactExceptionMessage('Cannot perform operation between currencies "IRR" and "IRT".');
 
         match ($operation) {
             'add' => $money->add($operand),
@@ -218,7 +218,7 @@ class MoneyTest extends TestCase
     public function test_it_throws_when_currency_is_not_supported(): void
     {
         $this->expectException(CurrencyNotSupportedException::class);
-        $this->expectExceptionMessageIs("Currency code 'USD' is not supported.");
+        $this->expectExactExceptionMessage("Currency code 'USD' is not supported.");
 
         CurrencyFactory::createFromIsoCode('USD');
     }
@@ -248,7 +248,7 @@ class MoneyTest extends TestCase
         config(['money.exchange.IRR.USD' => null]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageIs('Exchange rate from IRR to USD not found.');
+        $this->expectExactExceptionMessage('Exchange rate from IRR to USD not found.');
 
         (new Money(100, $currency))->convert($target);
     }

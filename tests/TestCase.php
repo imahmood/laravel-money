@@ -8,6 +8,11 @@ use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
 {
+    protected function expectExactExceptionMessage(string $message): void
+    {
+        $this->expectExceptionMessageMatches('/\\A'.preg_quote($message, '/').'\\z/');
+    }
+
     /**
      * Add the package provider.
      *

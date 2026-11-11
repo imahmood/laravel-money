@@ -4,7 +4,7 @@
 
 Before installing the package, make sure your application has:
 
-- PHP 8.1 or newer
+- PHP 8.3 or newer
 - The `decimal` PHP extension
 
 ## Install with Composer

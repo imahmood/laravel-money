@@ -26,7 +26,7 @@ class CurrencyTest extends TestCase
     public function test_it_rejects_an_empty_currency_code(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageIs('Currency code must not be empty.');
+        $this->expectExactExceptionMessage('Currency code must not be empty.');
 
         new Currency(
             code: '   ',
@@ -41,7 +41,7 @@ class CurrencyTest extends TestCase
     public function test_it_rejects_negative_currency_decimals(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageIs('Currency decimals must be zero or greater.');
+        $this->expectExactExceptionMessage('Currency decimals must be zero or greater.');
 
         new Currency(
             code: 'USD',
