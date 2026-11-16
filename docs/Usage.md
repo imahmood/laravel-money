@@ -1,14 +1,14 @@
 # Usage
 
-The package exposes the `money()` helper for creating money values. If no currency is provided, the configured `defaultCurrency` is used.
+The package exposes the `money()` helper for creating money values. If no currency is provided, the configured `defaultCurrency` is used. Use the `currency()` helper to create a configured currency from its ISO code; codes are trimmed and normalized to uppercase. The examples below assume USD and EUR have been added to `config/money.php`.
 
 ```php
-use Imahmood\Money\ValueObjects\CurrencyFactory;
-
 $amount = money(1500);
-$amount->currency()->code; // IRR
+$amount->currency()->code; // configured default currency
 
-$usd = money('19.99', CurrencyFactory::createFromIsoCode('USD'));
+$usd = currency(' usd ');
+$amount = money('19.99', 'USD');
+$sameAmount = money('19.99', $usd);
 ```
 
 Amounts may be integers, numeric strings, or `Decimal\Decimal` instances. Decimal arithmetic is used internally for precise calculations.
@@ -18,7 +18,7 @@ Amounts may be integers, numeric strings, or `Decimal\Decimal` instances. Decima
 Money values are immutable: each arithmetic method returns a new `Money` instance and leaves the original unchanged.
 
 ```php
-$amount = money(100);
+$amount = money(100, 'USD');
 
 $amount->add(25)->toString(); // 125
 $amount->sub(10)->toString(); // 90
@@ -29,7 +29,7 @@ $amount->div(4)->toString();  // 25
 The operand can also be another `Money` instance or a `Decimal\Decimal` instance:
 
 ```php
-$amount->add(money(25));
+$amount->add(money(25, 'USD'));
 ```
 
 Operations between two money values require matching currencies. A `CurrencyMismatchException` is thrown when their currencies differ.
@@ -37,12 +37,14 @@ Operations between two money values require matching currencies. A `CurrencyMism
 ## Compare and inspect values
 
 ```php
-$amount = money(100);
+$amount = money(100, 'USD');
 
 $amount->equals(100);       // true
-$amount->equals(money(100)); // true
+$amount->equals(money(100, 'USD')); // true
 $amount->isZero();          // false
 $amount->isNegative();      // false
+$amount->isPositive();      // true
+$amount->isSameCurrency(money(50, 'USD')); // true
 
 $amount->greaterThan(50);           // true
 $amount->lessThan(200);             // true
@@ -52,13 +54,20 @@ $amount->lessThanOrEqual(100);      // true
 
 Comparison methods accept integers, `Decimal\Decimal` instances, or `Money` values with the same currency. Comparisons between different currencies throw a `CurrencyMismatchException`.
 
+Use `zero()` to create a zero-valued `Money` instance. It uses the configured default currency unless a currency is provided:
+
+```php
+$zero = $amount->zero();
+$eurZero = $amount->zero(currency('EUR'));
+```
+
 Use these methods to access the value and currency:
 
 ```php
 $amount->toDecimal();             // Decimal\Decimal
 $amount->toInt();                 // 100
 $amount->toString();              // "100"
-$amount->currency()->code;        // "IRR"
+$amount->currency()->code;        // "USD"
 (string) $amount;                 // "100"
 json_encode($amount);             // "\"100\""
 ```
@@ -68,13 +77,11 @@ json_encode($amount);             // "\"100\""
 Pass a configured target currency to `convert()`:
 
 ```php
-use Imahmood\Money\ValueObjects\CurrencyFactory;
+$usd = money(1000, 'USD');
+$eur = $usd->convert(currency('EUR'));
 
-$irr = money(1000);
-$irt = $irr->convert(CurrencyFactory::localCurrency());
-
-$irt->toString(); // 100
-$irt->currency()->code; // IRT
+$eur->toString(); // depends on the configured USD -> EUR exchange rate
+$eur->currency()->code; // EUR
 ```
 
 The conversion uses the rate configured for the source and target currency. If an exchange rate is explicitly configured as `null`, an `InvalidArgumentException` is thrown.
@@ -82,8 +89,8 @@ The conversion uses the rate configured for the source and target currency. If a
 The local-currency helpers provide shortcuts for the configured currencies:
 
 ```php
-$irr = from_local_currency(100); // local currency -> default currency
-$irt = to_local_currency(100);   // default currency -> local currency
+$default = from_local_currency(100); // local currency -> default currency
+$local = to_local_currency(100);     // default currency -> local currency
 ```
 
 ## Format amounts
@@ -91,10 +98,10 @@ $irt = to_local_currency(100);   // default currency -> local currency
 `format()` uses the target currency's configured separators and decimal precision. `formatWithSymbol()` also includes its configured symbols:
 
 ```php
-$amount = money(1234567);
+$amount = money(1234567, 'USD');
 
-$amount->format();          // 1٬234٬567
-$amount->formatWithSymbol(); // 1٬234٬567 ریال
+$amount->format();           // 1,234,567
+$amount->formatWithSymbol(); // $ 1,234,567
 ```
 
 ## Cast money values in Eloquent
@@ -128,11 +135,12 @@ The cast reads the currency from `currency_code` for each model row and throws w
 
 ## Define and use a custom currency
 
-Add the currency to `config/money.php`, then create it through `CurrencyFactory`:
+Add the currency to `config/money.php`, then create it through the `currency()` helper:
 
 ```php
-$currency = CurrencyFactory::createFromIsoCode('USD');
-$amount = money('19.99', $currency);
+$usd = currency('USD');
+$eur = currency('EUR');
+$amount = money('19.99', $usd);
 ```
 
 Attempting to create a currency code that is not configured throws a `CurrencyNotSupportedException`.
