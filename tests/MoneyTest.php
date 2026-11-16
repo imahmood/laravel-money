@@ -67,10 +67,8 @@ class MoneyTest extends TestCase
 
     public function test_it_creates_zero_money_with_the_requested_currency(): void
     {
-        $money = new Money(100, $this->currency('IRT', 'تومان'));
-
-        $zero = $money->zero();
-        $customZero = $money->zero($this->currency('IRT', 'تومان'));
+        $zero = Money::zero();
+        $customZero = Money::zero($this->currency('IRT', 'تومان'));
 
         $this->assertSame('0', $zero->toString());
         $this->assertSame('IRR', $zero->currency()->code);

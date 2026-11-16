@@ -21,6 +21,11 @@ final class Money implements JsonSerializable, Stringable
         $this->currency = $currency;
     }
 
+    public static function zero(?Currency $currency = null): self
+    {
+        return new self(0, $currency ?? CurrencyFactory::defaultCurrency());
+    }
+
     public function isZero(): bool
     {
         return $this->value->isZero();
@@ -90,11 +95,6 @@ final class Money implements JsonSerializable, Stringable
         $this->validateValue($value);
 
         return $this->value->compareTo((string) $value) <= 0;
-    }
-
-    public function zero(?Currency $currency = null): self
-    {
-        return new self(0, $currency ?? CurrencyFactory::defaultCurrency());
     }
 
     /**

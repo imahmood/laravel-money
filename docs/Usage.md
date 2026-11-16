@@ -57,8 +57,10 @@ Comparison methods accept integers, `Decimal\Decimal` instances, or `Money` valu
 Use `zero()` to create a zero-valued `Money` instance. It uses the configured default currency unless a currency is provided:
 
 ```php
-$zero = $amount->zero();
-$eurZero = $amount->zero(currency('EUR'));
+use Imahmood\Money\ValueObjects\Money;
+
+$zero = Money::zero();
+$eurZero = Money::zero(currency('EUR'));
 ```
 
 Use these methods to access the value and currency:
