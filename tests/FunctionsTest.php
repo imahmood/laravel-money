@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Imahmood\Money\Tests;
 
 use Decimal\Decimal;
+use Imahmood\Money\ValueObjects\Currency;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -58,5 +59,21 @@ class FunctionsTest extends TestCase
         $this->expectExactExceptionMessage('Cannot convert value of type `array` to decimal');
 
         decimal([]);
+    }
+
+    public function test_it_creates_currencies_from_iso_codes(): void
+    {
+        $result = currency(' irr ');
+
+        $this->assertInstanceOf(Currency::class, $result);
+        $this->assertSame('IRR', $result->code);
+    }
+
+    public function test_money_accepts_a_currency_code(): void
+    {
+        $money = money('19.99', ' irr ');
+
+        $this->assertSame('19.99', $money->toString());
+        $this->assertSame('IRR', $money->currency()->code);
     }
 }

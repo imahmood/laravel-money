@@ -12,6 +12,8 @@ class CurrencyFactory
      */
     public static function createFromIsoCode(string $code): Currency
     {
+        $code = strtoupper(trim($code));
+
         /**
          * @var array{decimals: int, decimalPoint: string, thousandsSep: string, symbolLeft: string, symbolRight: string}|null $config
          */
@@ -21,7 +23,7 @@ class CurrencyFactory
         }
 
         return new Currency(
-            code: strtoupper($code),
+            code: $code,
             decimals: (int) $config['decimals'],
             decimalPoint: $config['decimalPoint'],
             thousandsSep: $config['thousandsSep'],

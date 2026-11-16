@@ -48,6 +48,36 @@ class MoneyTest extends TestCase
         $this->assertFalse((new Money(1, $currency))->isNegative());
     }
 
+    public function test_it_detects_positive_values(): void
+    {
+        $currency = $this->currency();
+
+        $this->assertTrue((new Money(1, $currency))->isPositive());
+        $this->assertFalse((new Money(0, $currency))->isPositive());
+        $this->assertFalse((new Money(-1, $currency))->isPositive());
+    }
+
+    public function test_it_compares_currencies(): void
+    {
+        $money = new Money(100, $this->currency());
+
+        $this->assertTrue($money->isSameCurrency(new Money(25, $this->currency())));
+        $this->assertFalse($money->isSameCurrency(new Money(25, $this->currency('IRT', 'تومان'))));
+    }
+
+    public function test_it_creates_zero_money_with_the_requested_currency(): void
+    {
+        $money = new Money(100, $this->currency('IRT', 'تومان'));
+
+        $zero = $money->zero();
+        $customZero = $money->zero($this->currency('IRT', 'تومان'));
+
+        $this->assertSame('0', $zero->toString());
+        $this->assertSame('IRR', $zero->currency()->code);
+        $this->assertSame('0', $customZero->toString());
+        $this->assertSame('IRT', $customZero->currency()->code);
+    }
+
     public function test_it_compares_values_with_ints_decimals_and_money(): void
     {
         $currency = $this->currency();

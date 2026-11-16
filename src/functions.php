@@ -32,13 +32,27 @@ if (! function_exists('decimal')) {
     }
 }
 
+if (! function_exists('currency')) {
+    /**
+     * @throws \Imahmood\Money\Exceptions\CurrencyNotSupportedException
+     */
+    function currency(string $code): Currency
+    {
+        return CurrencyFactory::createFromIsoCode($code);
+    }
+}
+
 if (! function_exists('money')) {
     /**
      * @throws \Imahmood\Money\Exceptions\CurrencyNotSupportedException
      */
-    function money(Decimal|string|int $amount, ?Currency $currency = null): Money
+    function money(Decimal|string|int $amount, Currency|string|null $currency = null): Money
     {
         $currency ??= CurrencyFactory::defaultCurrency();
+
+        if (is_string($currency)) {
+            $currency = CurrencyFactory::createFromIsoCode($currency);
+        }
 
         return new Money($amount, $currency);
     }

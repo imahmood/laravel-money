@@ -31,6 +31,16 @@ final class Money implements JsonSerializable, Stringable
         return $this->value->isNegative();
     }
 
+    public function isPositive(): bool
+    {
+        return ! $this->value->isZero() && $this->value->isPositive();
+    }
+
+    public function isSameCurrency(Money $value): bool
+    {
+        return $this->currency->equals($value->currency);
+    }
+
     public function equals(Money|Decimal|int $value): bool
     {
         try {
@@ -80,6 +90,11 @@ final class Money implements JsonSerializable, Stringable
         $this->validateValue($value);
 
         return $this->value->compareTo((string) $value) <= 0;
+    }
+
+    public function zero(?Currency $currency = null): self
+    {
+        return new self(0, $currency ?? CurrencyFactory::defaultCurrency());
     }
 
     /**
